@@ -1,0 +1,79 @@
+# Docker Compose configuration
+# This file defines multi-container Docker applications
+# It orchestrates the Flask app and Nginx reverse proxy
+
+#version: '3.8'
+
+# Services: Define the containers that will run
+services:
+  # Flask application service
+  app:
+    # Build configuration for the app container
+    build:
+      context: . #during the build wihch file will docker will be working with , So the build context determines what Docker is allowed to access.
+      dockerfile: Dockerfile #This simply says Use this Dockerfile.
+
+    # Container name for easy reference
+    container_name: flask_app #Without this
+#Docker invents names.
+#Example :
+#docker-learning22222-app-1
+    
+    # Restart policy: Always restart the container if it stops
+    restart: unless-stopped
+    
+    # Environment variables
+    environment:
+      - FLASK_ENV=production
+      - FLASK_DEBUG=0
+    
+    # Networks: Connect this container to our custom network
+    networks:
+      - app_network
+    
+    # No ports exposed directly - traffic goes through Nginx
+    # This is a security best practice
+
+  # Nginx reverse proxy service
+  nginx:
+    # Use the official Nginx image
+    image: nginx:alpine
+    
+    # Container name for easy reference
+    container_name: nginx_proxy
+    
+    # Restart policy: Always restart the container if it stops
+    restart: unless-stopped
+    
+    # Port mapping: Map host port 80 to container port 80
+    # Format: "HOST_PORT:CONTAINER_PORT"
+    # This makes the application accessible on http://localhost or http://myapp.local
+    ports:
+      - "80:80"
+    
+    # Volume mapping: Mount our nginx.conf into the container
+    # Format: "HOST_PATH:CONTAINER_PATH"
+    # This allows us to modify nginx.conf without rebuilding the image
+    #The :ro suffix means read-only, so Nginx can use the file but #cannot modify it. This lets you edit nginx.conf on your host #machine and have the container use it immediately, without #rebuilding the image.
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    
+    # Networks: Connect this container to our custom network
+    networks:
+      - app_network
+    
+    # Depends on: Ensure the app container starts before nginx
+    depends_on:
+      - app
+      #If you use the more advanced form:
+      #depends_on:
+      #  app:
+     #       condition: service_healthy
+    #Compose waits until the Flask container passes its health check #before starting Nginx. This avoids startup races where Nginx #tries to connect before Flask is actually ready.
+
+# Networks: Define custom networks for container communication
+networks:
+  app_network:
+    # Driver: Use bridge driver for local development
+    # Bridge networks are isolated networks that allow containers to communicate
+    driver: bridge #The default bridge driver creates a private virtual LAN for your containers.

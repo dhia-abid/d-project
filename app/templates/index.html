@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Docker Learning Lab - Animation Demo</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Docker Learning Lab</h1>
+        <p>Click the buttons to trigger animations and learn about Docker deployment!</p>
+        
+        <div class="button-group">
+            <button id="btn1" class="animation-btn">Animation 1</button>
+            <button id="btn2" class="animation-btn">Animation 2</button>
+        </div>
+        
+        <div id="animation-target" class="animation-target">
+            <div class="box"></div>
+        </div>
+    </div>
+    
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
